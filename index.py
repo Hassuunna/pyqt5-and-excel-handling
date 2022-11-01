@@ -52,6 +52,23 @@ class MainApp(formClass, baseClass):
             tableItem = QTableWidgetItem(str(averages2[column]))
             self.tableWidget.setItem(numberofCurrentRows, column,tableItem)
     
+    def Save(self):
+        columnHeaders = []
+
+        # create column header list
+        for j in range(self.tableWidget.model().columnCount()):
+            columnHeaders.append(self.tableWidget.horizontalHeaderItem(j).text())
+
+        df = pd.DataFrame(columns=columnHeaders)
+
+        # create dataframe object recordset
+        for row in range(self.tableWidget.rowCount()):
+            for col in range(self.tableWidget.columnCount()):
+                df.at[row, columnHeaders[col]] = self.tableWidget.item(row, col).text()
+
+        df.to_excel('Dummy.xlsx', index=False)
+        print('Excel file exported')
+
 
 def main():
     app = QApplication(sys.argv)
