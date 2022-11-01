@@ -3,7 +3,7 @@ from os import path
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from PyQt5.uic import loadUiType
-from numpy import Infinity
+import openpyxl
 import pandas as pd
 
 class PandasModel(QAbstractTableModel):
@@ -30,17 +30,21 @@ class PandasModel(QAbstractTableModel):
         if orientation == Qt.Vertical and role == Qt.DisplayRole:
             return self._data.index[rowcol]
 
-formClass, baseClass = loadUiType(path.join(path.dirname(__file__),'design2.ui'))
+formClass, baseClass = loadUiType(path.join(path.dirname(__file__),'design3.ui'))
 
 class MainApp(formClass, baseClass):
+    start, end = 0, 0
+    intervals = []
     df = None
     result_df = None
+    final_result = pd.DataFrame()
     def __init__(self, parent=None):
         super(MainApp, self).__init__(parent)
         QMainWindow.__init__(self)
         self.setupUi(self)
         self.Browse_BTN.clicked.connect(self.addItemsToTable)
         self.Calculate_BTN.clicked.connect(self.Calculate)
+        self.Append_BTN.clicked.connect(self.Append)
         self.Save_BTN.clicked.connect(self.Save)
 
     def addItemsToTable(self):
@@ -72,22 +76,28 @@ class MainApp(formClass, baseClass):
         first_header = self.df.columns.tolist()[0]
         mod_df = self.df.set_index(first_header)
         #what if startValue and endValue are empty? done
-        start = int(self.startValue.text()) if not self.startValue.text() == '' else mod_df.index[0]
-        end = int(self.endValue.text()) if not self.endValue.text() == '' else mod_df.index[-1]
-        interval = mod_df.loc[start: end]
+        self.start = int(self.startValue.text()) if not self.startValue.text() == '' else mod_df.index[0]
+        self.end = int(self.endValue.text()) if not self.endValue.text() == '' else mod_df.index[-1]
+        interval = mod_df.loc[self.start: self.end]
         # round done
         self.result_df = interval.aggregate(['min', 'max', 'mean']).astype(int)
         model = PandasModel(self.result_df)
         self.tableView.setModel(model)
 
 
+    def Append(self):
+        self.intrevals.append(str(self.start) + " - " + str(self.end))
+        new_row = pd.Series({})
+        self.final_result = pd.concat([self.final_result, new_row.to_frame().T, self.result_df])
+        print(self.final_result)
+
+
     def Save (self):
         #append start and end
         #add merged big cell
         #don't overwrite
-        myNewName = "new.xlsx" #QFileDialog.getSaveFileName(self, 'Save as', '', 'Excel (*.xlsx)')[0]
-        with pd.ExcelWriter(myNewName, mode="a", if_sheet_exists='overlay') as writer:
-            self.result_df.to_excel(writer,sheet_name="Sheet1", startrow=10, startcol=0)
+        myNewName = QFileDialog.getSaveFileName(self, 'Save as', '', 'Excel (*.xlsx)')[0]
+        self.final_result.to_excel(myNewName, startcol=1)
 
 
 def main():
