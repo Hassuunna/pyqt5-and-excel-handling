@@ -30,7 +30,7 @@ class PandasModel(QAbstractTableModel):
         if orientation == Qt.Vertical and role == Qt.DisplayRole:
             return self._data.index[rowcol]
 
-formClass, baseClass = loadUiType(path.join(path.dirname(__file__),'design.ui'))
+formClass, baseClass = loadUiType(path.join(path.dirname(__file__),'design2.ui'))
 
 class MainApp(formClass, baseClass):
     df = None
@@ -85,9 +85,9 @@ class MainApp(formClass, baseClass):
         #append start and end
         #add merged big cell
         #don't overwrite
-        myNewName = QFileDialog.getSaveFileName(self,'Save as', '', 'Excel (*.xlsx)')[0]
-        self.result_df.to_excel(myNewName)
-
+        myNewName = "new.xlsx" #QFileDialog.getSaveFileName(self, 'Save as', '', 'Excel (*.xlsx)')[0]
+        with pd.ExcelWriter(myNewName, mode="a", if_sheet_exists='overlay') as writer:
+            self.result_df.to_excel(writer,sheet_name="Sheet1", startrow=10, startcol=0)
 
 
 def main():
