@@ -33,6 +33,25 @@ class MainApp(formClass, baseClass):
                 tableItem = QTableWidgetItem(str(value))
                 self.tableWidget.setItem(row[0], col_index, tableItem)
 
+    def Average(self):
+        #column = 0
+        numberofCurrentRows = self.tableWidget.rowCount()
+        numberofCurrentColumns = self.tableWidget.columnCount()
+        averages = [0] * numberofCurrentColumns
+        # rowCount() This property holds the number of rows in the table
+        for row in range(numberofCurrentRows):
+            for column in range(numberofCurrentColumns):
+                # item(row, 0) Returns the item for the given row and column if one has been set; otherwise returns nullptr.
+                _item = self.tableWidget.item(row, column) 
+                if _item:
+                    item = self.tableWidget.item(row, column).text().replace(',','')
+                    averages[column] += float(item)
+        averages2 = [x / numberofCurrentRows for x in averages]
+        self.tableWidget.insertRow(numberofCurrentRows)
+        for column in range(numberofCurrentColumns):
+            tableItem = QTableWidgetItem(str(averages2[column]))
+            self.tableWidget.setItem(numberofCurrentRows, column,tableItem)
+    
 
 def main():
     app = QApplication(sys.argv)
