@@ -6,30 +6,7 @@ from PyQt5.uic import loadUiType
 from openpyxl import load_workbook
 from openpyxl.styles import Alignment
 import pandas as pd
-
-class PandasModel(QAbstractTableModel):
-    def __init__(self, data, parent=None):
-        QAbstractTableModel.__init__(self, parent)
-        self._data = data
-    
-    def rowCount(self, parent=None):
-        return len(self._data.values)
-
-    def columnCount(self, parent=None):
-        return self._data.columns.size
-
-    def data(self, index, role=Qt.DisplayRole):
-        if index.isValid():
-            if role == Qt.DisplayRole:
-                return QVariant(str(
-                    self._data.iloc[index.row()][index.column()]))
-        return QVariant()
-
-    def headerData(self, rowcol, orientation, role=Qt.DisplayRole):
-        if orientation == Qt.Horizontal and role == Qt.DisplayRole:
-            return self._data.columns[rowcol]
-        if orientation == Qt.Vertical and role == Qt.DisplayRole:
-            return self._data.index[rowcol]
+import pandasModel
 
 sourcePath = path.join(path.dirname(__file__),'design3.ui')
 
@@ -89,7 +66,7 @@ class MainApp(formClass, baseClass):
         print(interval)
         # round done
         self.result_df = interval.aggregate(['min', 'max', 'mean']).astype(int)
-        model = PandasModel(self.result_df)
+        model = pandasModel(self.result_df)
         self.tableView.setModel(model)
 
 
@@ -138,7 +115,6 @@ class MainApp(formClass, baseClass):
         
         # save it as the original file
         wb.save(excelFileName)
-
 
 
 def main():
